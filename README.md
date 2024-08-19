@@ -1,6 +1,6 @@
 # Flappy Haribon - Freshman Welcoming Edition
 
-This repository is a fork of the original [Flappy Bird](https://nebezb.com/floppybird/) game created by Dong Nguyen and .GEARS games. The assets used in this game have been extracted directly from the Flappy Bird android game.
+This repository is a fork of the original [Flappy Bird](https://nebezb.com/floppybird/) game created by Dong Nguyen and .GEARS games. The assets used in this game are a combination of the original assets from the original repository and modified versions created by our creative team.
 
 ## Credits
 
