@@ -4,7 +4,7 @@ This repository is a fork of the original [Flappy Bird](https://nebezb.com/flopp
 
 ## Credits
 
-- Original Game: [Flappy Bird](https://nebezb.com/floppybird/) by Dong Nguyen and .GEARS games
+- Original Game: [Flappy Bird](https://nebezb.com/flo ppybird/) by Dong Nguyen and .GEARS games
 - Forked Repository: [Original Repository](https://github.com/nebez/ts-floppybird)
 
 ## Freshman Welcoming

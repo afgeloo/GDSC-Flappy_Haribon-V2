@@ -9,7 +9,7 @@ var states = Object.freeze({
 var currentstate;
 
 var gravity = 0.25;
-var velocity = 5;
+var velocity = 0;
 var position = 180;
 var rotation = 0;
 var jump = -4.6;
@@ -32,6 +32,9 @@ var soundHit = new buzz.sound("assets/sounds/sfx_hit.ogg");
 var soundDie = new buzz.sound("assets/sounds/sfx_die.ogg");
 var soundSwoosh = new buzz.sound("assets/sounds/sfx_swooshing.ogg");
 buzz.all().setVolume(volume);
+
+// Look for bird color
+randomizeBirdColor();
 
 //loops
 var loopGameloop;
@@ -447,7 +450,6 @@ function updatePipes() {
   );
   $("#flyarea").append(newpipe);
   pipes.push(newpipe);
-  console.log(pipes);
 }
 
 var isIncompatible = {
@@ -483,3 +485,19 @@ var isIncompatible = {
     );
   },
 };
+
+function randomizeBirdColor() {
+  // get a random bird class
+  var birdClasses = [
+    "bird animated bird-1",
+    "bird animated bird-2",
+    "bird animated bird-3",
+    "bird animated bird-4",
+    "bird animated bird-5",
+  ];
+  var randomBirdClass =
+    birdClasses[Math.floor(Math.random() * birdClasses.length)];
+
+  // apply the random bird class to the player element
+  $(player).removeClass().addClass(randomBirdClass);
+}

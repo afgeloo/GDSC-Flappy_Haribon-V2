@@ -356,10 +356,29 @@ Screen - Game
   position: absolute;
   width: 34px;
   height: 24px;
-  background-image: url("../assets/bird.png");
 
   -webkit-animation: animBird 300ms steps(4) infinite;
   animation: animBird 300ms steps(4) infinite;
+}
+
+.bird-1 {
+  background-image: url("../assets/bird-1.png");
+}
+
+.bird-2 {
+  background-image: url("../assets/bird-2.png");
+}
+
+.bird-3 {
+  background-image: url("../assets/bird-3.png");
+}
+
+.bird-4 {
+  background-image: url("../assets/bird-4.png");
+}
+
+.bird-5 {
+  background-image: url("../assets/bird-5.png");
 }
 
 .pipe {
