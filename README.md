@@ -13,4 +13,4 @@ This version of Flappy Bird has been customized for the Freshman Welcoming event
 
 ## Play the Game
 
-You can play the Flappy Haribon [here](https://nebezb.com/floppybird/).
+You can play the Flappy Haribon [here](https://flappy-haribon.vercel.app/).
