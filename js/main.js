@@ -416,6 +416,8 @@ $("#replay").click(function () {
 
       //start the game over!
       showSplash();
+
+      randomizeBirdColor();
     }
   );
 });
