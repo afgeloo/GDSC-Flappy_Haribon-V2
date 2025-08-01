@@ -318,8 +318,6 @@ function gameloop() {
       } else if (pu.hasClass("shieldpowerup")) {
         showPowerText("You ate an Onion for Invincibility!");
       } else {
-        score += 5;
-        setBigScore();
         showPowerText("You catched an Egg for +5!");
       }
 
