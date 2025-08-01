@@ -29,6 +29,9 @@ var shieldColorSwitchInterval = null;
 var isShrunk = false;
 var shrinkTimeout = null;
 var shrinkBlinkTimeout = null;
+var poisonCount = 0;
+var poisonTimer = null;
+
 
 var volume = 30;
 var soundJump = new buzz.sound("assets/sounds/sfx_wing.ogg");
@@ -91,6 +94,8 @@ function showSplash() {
   $(".animated").css("-webkit-animation-play-state", "running");
 
   $("#splash").transition({ opacity: 1 }, 2000, "ease");
+  $("#powerup-guide").show();
+
 }
 
 function startGame() {
@@ -99,6 +104,7 @@ function startGame() {
 
   $("#splash").stop();
   $("#splash").transition({ opacity: 0 }, 500, "ease");
+  $("#powerup-guide").hide();
 
   setBigScore();
 
@@ -209,7 +215,7 @@ function gameloop() {
   var nextpipeupper = nextpipe.children(".pipe_upper");
 
   var pipetop = nextpipeupper.offset().top + nextpipeupper.height();
-  var pipeleft = nextpipeupper.offset().left - 2; 
+  var pipeleft = nextpipeupper.offset().left - 2;
   var piperight = pipeleft + pipewidth;
   var pipebottom = pipetop + pipeheight;
 
@@ -293,7 +299,7 @@ function gameloop() {
 
         setTimeout(() => {
           let blinkCount = 0;
-          const maxBlinks = 6; 
+          const maxBlinks = 6;
 
           const blinkInterval = setInterval(() => {
             flashPowerUpEffect();
@@ -301,14 +307,21 @@ function gameloop() {
             if (blinkCount >= maxBlinks) {
               clearInterval(blinkInterval);
             }
-          }, 333); 
+          }, 333);
         }, 3000);
-      } else {
+      } else if (pu.hasClass("poisonpowerup")) {
+        score -= 3;
+        if (score < 0) score = 0;
+
+        setBigScore();
+        showPowerText("Oops! Spoiled Egg! -3");
+      }
+      else {
         score += 5;
         setBigScore();
       }
 
-      pu.remove(); 
+      pu.remove();
       powerups.splice(i, 1);
       i--;
       soundScore.stop();
@@ -317,15 +330,13 @@ function gameloop() {
         showPowerText("You ate a Minibon for Shrink!");
       } else if (pu.hasClass("shieldpowerup")) {
         showPowerText("You ate an Onion for Invincibility!");
+      } else if (pu.hasClass("poisonpowerup")) {
+        showPowerText("Oops! Spoiled Egg! -3");
       } else {
         showPowerText("You catched an Egg for +5!");
       }
-
-
     }
   }
-
-
 }
 
 $(document).keydown(function (e) {
@@ -407,9 +418,9 @@ function setMedal() {
     return false;
 
   if (score >= 10) medal = "bronze";
-  if (score >= 20) medal = "silver";
-  if (score >= 30) medal = "gold";
-  if (score >= 40) medal = "platinum";
+  if (score >= 30) medal = "silver";
+  if (score >= 50) medal = "gold";
+  if (score >= 80) medal = "platinum";
 
   elemmedal.append(
     '<img src="assets/medal_' + medal + '.png" alt="' + medal + '">'
@@ -456,7 +467,7 @@ function playerDead() {
   }
   clearInterval(loopDayNight);
   loopDayNight = null;
-  $("#sky").removeClass("night-mode"); 
+  $("#sky").removeClass("night-mode");
 
   if (shrinkTimeout) {
     clearTimeout(shrinkTimeout);
@@ -569,32 +580,51 @@ var powerups = [];
 function spawnPowerUp() {
   if (currentstate !== states.GameScreen) return;
 
-  var powerup = $('<div class="powerup animated"></div>');
+  // 30% chance to spawn 2 power-ups
+  const howMany = Math.random() < 0.3 ? 2 : 1;
 
-  const rand = Math.random();
-  if (rand < 0.33) {
-    powerup.addClass("shieldpowerup");
-  } else if (rand < 0.66) {
-    powerup.addClass("scorepowerup");
-  } else {
-    powerup.addClass("shrinkpowerup"); 
-  }
+  for (let i = 0; i < howMany; i++) {
+    const powerup = $('<div class="powerup animated"></div>');
 
-  var top = Math.floor(Math.random() * (flyArea - 60)) + 30;
-  powerup.css("top", top + "px");
+    // Random movement speed between 2 to 6 seconds
+    let duration = Math.random() * (6 - 2) + 2;
+    powerup.css({
+      animationDuration: duration + "s",
+      WebkitAnimationDuration: duration + "s",
+    });
 
-  $("#flyarea").append(powerup);
-  powerups.push(powerup);
-
-  setTimeout(() => {
-    powerup.remove();
-    const index = powerups.indexOf(powerup);
-    if (index !== -1) {
-      powerups.splice(index, 1);
+    // Random power-up type
+    // Random power-up type
+    const rand = Math.random();
+    if (rand < 0.25) {
+      powerup.addClass("shieldpowerup");
+    } else if (rand < 0.5) {
+      powerup.addClass("scorepowerup");
+    } else if (rand < 0.75) {
+      powerup.addClass("shrinkpowerup");
+    } else {
+      powerup.addClass("poisonpowerup");
     }
-  }, 7000);
-}
 
+
+    // Random vertical position (avoid perfect overlap)
+    const buffer = 40 * i; // offset second powerup vertically
+    var top = Math.floor(Math.random() * (flyArea - 100)) + 30 + buffer;
+    powerup.css("top", top + "px");
+
+    $("#flyarea").append(powerup);
+    powerups.push(powerup);
+
+    // Cleanup after power-up moves across screen
+    setTimeout(() => {
+      powerup.remove();
+      const index = powerups.indexOf(powerup);
+      if (index !== -1) {
+        powerups.splice(index, 1);
+      }
+    }, duration * 1000 + 500); // safe buffer
+  }
+}
 
 var isIncompatible = {
   Android: function () {

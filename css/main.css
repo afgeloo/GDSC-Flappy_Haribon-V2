@@ -521,3 +521,108 @@ Screen - Game
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
+.poisonpowerup {
+  background-image: url("../assets/rotten-egg.png");
+}
+
+#powerup-guide {
+  position: absolute;
+  top: 40%;
+  right: 10%; 
+  transform: translateY(-50%); 
+  width: 320px;
+  padding: 20px 24px;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  font-family: 'Segoe UI', sans-serif;
+  color: #fff;
+  text-align: left;
+  z-index: 999;
+  animation: fadeInScale 0.4s ease-out;
+}
+
+#powerup-guide h3 {
+  font-size: 20px;
+  margin-bottom: 14px;
+  text-align: center;
+  font-weight: 600;
+}
+
+#powerup-guide ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#powerup-guide li {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  font-size: 15px;
+  gap: 12px;
+}
+
+#powerup-guide .icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.icon.shrink {
+  background-image: url("../assets/minibon.png");
+  background-color: rgba(255, 215, 0, 0.15);
+}
+.icon.shield {
+  background-image: url("../assets/onion.png");
+  background-color: rgba(255, 105, 180, 0.15);
+}
+.icon.score {
+  background-image: url("../assets/catch-the-egg.png");
+  background-color: rgba(144, 238, 144, 0.15);
+}
+.icon.poison {
+  background-image: url("../assets/rotten-egg.png");
+  background-color: rgba(139, 0, 0, 0.15);
+}
+
+
+@media (max-width: 768px) {
+  #splash {
+    width: 140px;
+    height: 126px;
+    top: 60px;
+    background-size: contain;
+  }
+
+  #powerup-guide {
+    width: 90vw;
+    right: 50%;
+    transform: translateX(50%) translateY(-50%);
+    padding: 16px 18px;
+    font-size: 14px;
+    top: 95%
+  }
+
+  #powerup-guide h3 {
+    font-size: 18px;
+  }
+
+  #powerup-guide li {
+    font-size: 14px;
+    gap: 10px;
+  }
+
+  #powerup-guide .icon {
+    width: 28px;
+    height: 28px;
+  }
+}
