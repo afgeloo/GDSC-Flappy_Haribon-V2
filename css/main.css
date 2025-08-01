@@ -452,16 +452,7 @@ Screen - Game
   color: #fff;
 }
 
-.powerup {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background-color: blue;
-  border-radius: 50%;
-  left: 100%;
-  z-index: 2;
-  animation: moveLeft 3s linear forwards;
-}
+
 
 @keyframes moveLeft {
   0% {
@@ -472,38 +463,24 @@ Screen - Game
   }
 }
 
-.shieldpowerup {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background-color: pink;
-  border-radius: 50%;
-  left: 100%;
-  z-index: 2;
-  animation: moveLeft 3s linear forwards;
-}
-
 .powerup {
   position: absolute;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   left: 100%;
   z-index: 10;
   animation: moveLeft 3s linear forwards;
-  border: 2px solid white; /* default fallback */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .scorepowerup {
-  background-color: #00d2ff;
-  border: 2px solid #00d2ff;
-  box-shadow: 0 0 12px 4px #00d2ff;
+  background-image: url("../assets/catch-the-egg.png");
 }
 
 .shieldpowerup {
-  background-color: pink;
-  border: 2px solid pink;
-  box-shadow: 0 0 12px 4px pink;
+  background-image: url("../assets/onion.png");
 }
 
 #powerup-flash {
@@ -526,8 +503,21 @@ Screen - Game
 }
 
 .shrinkpowerup {
-  background-color: violet;
-  border: 2px solid violet;
-  box-shadow: 0 0 12px 4px violet;
+  background-image: url("../assets/minibon.png");
+}
+
+#powerup-text {
+  position: fixed;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%) scale(1);
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 2px 2px 5px #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
