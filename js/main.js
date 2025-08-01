@@ -23,6 +23,9 @@ var pipewidth = 52;
 var pipes = new Array();
 
 var replayclickable = false;
+var hasShield = false;
+var shieldTimeout = null;
+var shieldColorSwitchInterval = null;
 
 //sounds
 var volume = 30;
@@ -99,6 +102,7 @@ function showSplash() {
 
 function startGame() {
   currentstate = states.GameScreen;
+  startDayNightCycle();
 
   //fade out the splash
   $("#splash").stop();
@@ -109,18 +113,49 @@ function startGame() {
 
   //debug mode?
   if (debugmode) {
-    //show the bounding boxes
     $(".boundingbox").show();
   }
 
-  //start up our loops
-  var updaterate = 1000.0 / 60.0; //60 times a second
+  // Clear previous power-ups
+  $(".powerup").remove();
+  powerups = [];
+
+  // start game loops
+  var updaterate = 1000.0 / 60.0;
   loopGameloop = setInterval(gameloop, updaterate);
   loopPipeloop = setInterval(updatePipes, 1400);
+  loopPowerUp = setInterval(spawnPowerUp, 5000);
 
-  //jump from the start!
+  // start flying
   playerJump();
 }
+
+function flashPowerUpEffect() {
+  const flash = $("#powerup-flash");
+  flash.stop(true, true).css({
+    opacity: 1,
+    display: "block"
+  });
+
+  setTimeout(() => {
+    flash.fadeOut(150);
+  }, 50);
+}
+
+var loopDayNight;
+
+function startDayNightCycle() {
+  let isNight = false;
+  loopDayNight = setInterval(() => {
+    isNight = !isNight;
+    if (isNight) {
+      $("#sky").addClass("night-mode");
+    } else {
+      $("#sky").removeClass("night-mode");
+    }
+  }, 10000); // every 10 seconds
+}
+
 
 function updatePlayer(player) {
   //rotation
@@ -192,16 +227,18 @@ function gameloop() {
   }
 
   //have we gotten inside the pipe yet?
-  if (boxright > pipeleft) {
-    //we're within the pipe, have we passed between upper and lower pipes?
-    if (boxtop > pipetop && boxbottom < pipebottom) {
-      //yeah! we're within bounds
-    } else {
-      //no! we touched the pipe
-      playerDead();
-      return;
+  // Pipe collision with shield logic
+  if (!hasShield) {
+    if (boxright > pipeleft) {
+      if (boxtop > pipetop && boxbottom < pipebottom) {
+        // safe passage
+      } else {
+        playerDead();
+        return;
+      }
     }
   }
+
 
   //have we passed the imminent danger?
   if (boxleft > piperight) {
@@ -211,6 +248,85 @@ function gameloop() {
     //and score a point
     playerScore();
   }
+
+  // Power-up collision detection
+  for (let i = 0; i < powerups.length; i++) {
+    let pu = powerups[i];
+    let puBox = pu[0].getBoundingClientRect();
+
+    if (
+      boxright > puBox.left &&
+      boxleft < puBox.right &&
+      boxbottom > puBox.top &&
+      boxtop < puBox.bottom
+    ) {
+      // ✨ Differentiate power-up type by class
+      if (pu.hasClass("shrinkpowerup")) {
+        $("#player").css({
+          transform: "scale(0.5)",
+          "transform-origin": "center center",
+        });
+
+        // restore after 10 seconds
+        setTimeout(() => {
+          $("#player").css("transform", "");
+        }, 10000);
+
+      } else
+        if (pu.hasClass("shieldpowerup")) {
+          // Pink shield effect
+          hasShield = true;
+          $("#player").css("filter", "drop-shadow(0 0 10px pink)");
+
+          // start changing bird color every 300ms
+          if (shieldColorSwitchInterval) clearInterval(shieldColorSwitchInterval);
+          shieldColorSwitchInterval = setInterval(() => {
+            randomizeBirdColor();
+          }, 100);
+
+          // stop effect after 5 seconds
+          if (shieldTimeout) clearTimeout(shieldTimeout);
+          shieldTimeout = setTimeout(() => {
+            hasShield = false;
+            $("#player").css("filter", "");
+            clearInterval(shieldColorSwitchInterval);
+            shieldColorSwitchInterval = null;
+            randomizeBirdColor();
+          }, 5000);
+
+          // Flash screen 2 seconds before end
+          // Start blinking 2s before shield ends (3s after pickup)
+          setTimeout(() => {
+            let blinkCount = 0;
+            const maxBlinks = 6; // 6 blinks at 333ms = 2 seconds
+
+            const blinkInterval = setInterval(() => {
+              flashPowerUpEffect();
+              blinkCount++;
+              if (blinkCount >= maxBlinks) {
+                clearInterval(blinkInterval);
+              }
+            }, 333); // blink every 333ms
+          }, 3000);
+
+
+
+        } else {
+          // Default power-up (blue or score-based)
+          score += 5;
+          setBigScore();
+        }
+
+      // Common removal & sound logic
+      pu.remove(); // remove from DOM
+      powerups.splice(i, 1);
+      i--;
+      soundScore.stop();
+      soundScore.play();
+    }
+  }
+
+
 }
 
 //Handle space bar
@@ -252,10 +368,10 @@ function setBigScore(erase) {
   for (var i = 0; i < digits.length; i++)
     elemscore.append(
       "<img src='assets/font_big_" +
-        digits[i] +
-        ".png' alt='" +
-        digits[i] +
-        "'>"
+      digits[i] +
+      ".png' alt='" +
+      digits[i] +
+      "'>"
     );
 }
 
@@ -267,10 +383,10 @@ function setSmallScore() {
   for (var i = 0; i < digits.length; i++)
     elemscore.append(
       "<img src='assets/font_small_" +
-        digits[i] +
-        ".png' alt='" +
-        digits[i] +
-        "'>"
+      digits[i] +
+      ".png' alt='" +
+      digits[i] +
+      "'>"
     );
 }
 
@@ -282,10 +398,10 @@ function setHighScore() {
   for (var i = 0; i < digits.length; i++)
     elemscore.append(
       "<img src='assets/font_small_" +
-        digits[i] +
-        ".png' alt='" +
-        digits[i] +
-        "'>"
+      digits[i] +
+      ".png' alt='" +
+      digits[i] +
+      "'>"
     );
 }
 
@@ -311,81 +427,75 @@ function setMedal() {
 }
 
 function playerDead() {
-  //stop animating everything!
   $(".animated").css("animation-play-state", "paused");
   $(".animated").css("-webkit-animation-play-state", "paused");
 
-  //drop the bird to the floor
-  var playerbottom = $("#player").position().top + $("#player").width(); //we use width because he'll be rotated 90 deg
+  $("#player").css("transform", "");
+
+  var birdBox = document.getElementById("player").getBoundingClientRect();
+  var playerbottom = $("#player").position().top + birdBox.height;
   var floor = flyArea;
   var movey = Math.max(0, floor - playerbottom);
+
   $("#player").transition(
     { y: movey + "px", rotate: 90 },
     1000,
     "easeInOutCubic"
   );
 
-  //it's time to change states. as of now we're considered ScoreScreen to disable left click/flying
   currentstate = states.ScoreScreen;
 
-  //destroy our gameloops
   clearInterval(loopGameloop);
   clearInterval(loopPipeloop);
   loopGameloop = null;
   loopPipeloop = null;
+  clearInterval(loopPowerUp);
+  loopPowerUp = null;
 
-  //mobile browsers don't support buzz bindOnce event
+
   if (isIncompatible.any()) {
-    //skip right to showing score
     showScore();
   } else {
-    //play the hit sound (then the dead sound) and then show score
     soundHit.play().bindOnce("ended", function () {
       soundDie.play().bindOnce("ended", function () {
         showScore();
       });
     });
   }
+  clearInterval(loopDayNight);
+  loopDayNight = null;
+  $("#sky").removeClass("night-mode"); // Reset to day
+
 }
 
 function showScore() {
-  //unhide us
   $("#scoreboard").css("display", "block");
 
-  //remove the big score
   setBigScore(true);
 
-  //have they beaten their high score?
   if (score > highscore) {
-    //yeah!
     highscore = score;
-    //save it!
     setCookie("highscore", highscore, 999);
   }
 
-  //update the scoreboard
   setSmallScore();
   setHighScore();
   var wonmedal = setMedal();
 
-  //SWOOSH!
   soundSwoosh.stop();
   soundSwoosh.play();
 
-  //show the scoreboard
-  $("#scoreboard").css({ y: "40px", opacity: 0 }); //move it down so we can slide it up
+  $("#scoreboard").css({ y: "40px", opacity: 0 });
   $("#replay").css({ y: "40px", opacity: 0 });
   $("#scoreboard").transition(
     { y: "0px", opacity: 1 },
     600,
     "ease",
     function () {
-      //When the animation is done, animate in the replay button and SWOOSH!
       soundSwoosh.stop();
       soundSwoosh.play();
       $("#replay").transition({ y: "0px", opacity: 1 }, 600, "ease");
 
-      //also animate in the MEDAL! WOO!
       if (wonmedal) {
         $("#medal").css({ scale: 2, opacity: 0 });
         $("#medal").transition({ opacity: 1, scale: 1 }, 1200, "ease");
@@ -393,28 +503,22 @@ function showScore() {
     }
   );
 
-  //make the replay button clickable
   replayclickable = true;
 }
 
 $("#replay").click(function () {
-  //make sure we can only click once
   if (!replayclickable) return;
   else replayclickable = false;
-  //SWOOSH!
   soundSwoosh.stop();
   soundSwoosh.play();
 
-  //fade out the scoreboard
   $("#scoreboard").transition(
     { y: "-40px", opacity: 0 },
     1000,
     "ease",
     function () {
-      //when that's done, display us back to nothing
       $("#scoreboard").css("display", "none");
 
-      //start the game over!
       showSplash();
 
       randomizeBirdColor();
@@ -424,35 +528,64 @@ $("#replay").click(function () {
 
 function playerScore() {
   score += 1;
-  //play score sound
   soundScore.stop();
   soundScore.play();
   setBigScore();
 }
 
 function updatePipes() {
-  //Do any pipes need removal?
   $(".pipe")
     .filter(function () {
       return $(this).position().left <= -100;
     })
     .remove();
 
-  //add a new pipe (top height + bottom height  + pipeheight == flyArea) and put it in our tracker
   var padding = 80;
-  var constraint = flyArea - pipeheight - padding * 2; //double padding (for top and bottom)
-  var topheight = Math.floor(Math.random() * constraint + padding); //add lower padding
+  var constraint = flyArea - pipeheight - padding * 2;
+  var topheight = Math.floor(Math.random() * constraint + padding);
   var bottomheight = flyArea - pipeheight - topheight;
   var newpipe = $(
     '<div class="pipe animated"><div class="pipe_upper" style="height: ' +
-      topheight +
-      'px;"></div><div class="pipe_lower" style="height: ' +
-      bottomheight +
-      'px;"></div></div>'
+    topheight +
+    'px;"></div><div class="pipe_lower" style="height: ' +
+    bottomheight +
+    'px;"></div></div>'
   );
   $("#flyarea").append(newpipe);
   pipes.push(newpipe);
 }
+
+var powerups = [];
+
+function spawnPowerUp() {
+  if (currentstate !== states.GameScreen) return;
+
+  var powerup = $('<div class="powerup animated"></div>');
+
+  const rand = Math.random();
+  if (rand < 0.33) {
+    powerup.addClass("shieldpowerup");
+  } else if (rand < 0.66) {
+    powerup.addClass("scorepowerup");
+  } else {
+    powerup.addClass("shrinkpowerup"); // yellow power-up
+  }
+
+  var top = Math.floor(Math.random() * (flyArea - 60)) + 30;
+  powerup.css("top", top + "px");
+
+  $("#flyarea").append(powerup);
+  powerups.push(powerup);
+
+  setTimeout(() => {
+    powerup.remove();
+    const index = powerups.indexOf(powerup);
+    if (index !== -1) {
+      powerups.splice(index, 1);
+    }
+  }, 7000);
+}
+
 
 var isIncompatible = {
   Android: function () {

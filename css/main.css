@@ -218,7 +218,14 @@ Screen - Game
 
   -webkit-animation: animSky 7s linear infinite;
   animation: animSky 7s linear infinite;
+  transition: background-color 1s ease, background-image 1s ease;
 }
+
+.night-mode {
+  background-color: #1a1a2e !important;
+  background-image: url("../assets/sky.png") !important;
+}
+
 
 #flyarea {
   position: absolute;
@@ -444,3 +451,83 @@ Screen - Game
   text-decoration: none;
   color: #fff;
 }
+
+.powerup {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-color: blue;
+  border-radius: 50%;
+  left: 100%;
+  z-index: 2;
+  animation: moveLeft 3s linear forwards;
+}
+
+@keyframes moveLeft {
+  0% {
+    left: 100%;
+  }
+  100% {
+    left: -50px;
+  }
+}
+
+.shieldpowerup {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-color: pink;
+  border-radius: 50%;
+  left: 100%;
+  z-index: 2;
+  animation: moveLeft 3s linear forwards;
+}
+
+.powerup {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  left: 100%;
+  z-index: 10;
+  animation: moveLeft 3s linear forwards;
+  border: 2px solid white; /* default fallback */
+}
+
+.scorepowerup {
+  background-color: #00d2ff;
+  border: 2px solid #00d2ff;
+  box-shadow: 0 0 12px 4px #00d2ff;
+}
+
+.shieldpowerup {
+  background-color: pink;
+  border: 2px solid pink;
+  box-shadow: 0 0 12px 4px pink;
+}
+
+#powerup-flash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(
+    to right,
+    rgba(255, 0, 0, 0.3) 0%,
+    rgba(255, 0, 0, 0) 30%,
+    rgba(255, 0, 0, 0) 70%,
+    rgba(255, 0, 0, 0.3) 100%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.05s ease;
+  z-index: 9999;
+}
+
+.shrinkpowerup {
+  background-color: violet;
+  border: 2px solid violet;
+  box-shadow: 0 0 12px 4px violet;
+}
+
